@@ -59,8 +59,8 @@
 ;; => ({:surname "Petrov", :year 1997, :id 2} {:surname "Sidorov", :year 1996, :id 3})
 ;;
 (defn where* [data condition-func]
-  (if-not data
-    '()
+  (if-not condition-func
+    data
     (filter condition-func data)))
 
 ;; (limit* student 1)
@@ -68,19 +68,18 @@
 ;;
 ;; Hint: if-not, take
 (defn limit* [data lim]
-  (if-not data
-    '()
+  (if-not lim
+    data
     (take lim data)))
 
 ;; (order-by* student :year)
 ;; => ({:surname "Sidorov", :year 1996, :id 3} {:surname "Petrov", :year 1997, :id 2} {:surname "Ivanov", :year 1998, :id 1})
 ;; Hint: if-not, sort-by
 (defn order-by* [data column]
-  (if-not data
-    '()
+  (if-not column
+    data
     (sort-by column data)))
 
- (order-by* student :year)
 ;; (join* (join* student-subject :student_id student :id) :subject_id subject :id)
 ;; => [{:subject "Math", :subject_id 1, :surname "Ivanov", :year 1998, :student_id 1, :id 1}
 ;;     {:subject "Math", :subject_id 1, :surname "Petrov", :year 1997, :student_id 2, :id 2}
@@ -95,7 +94,10 @@
   ;; 3. For each element of data1 (lets call it element1) find all elements of data2 (lets call each as element2) where column1 = column2.
   ;; 4. Use function 'merge' and merge element1 with each element2.
   ;; 5. Collect merged elements.
-  :ImplementMe!)
+  (reduce (fn [acc el]
+            (let [matched (filter #(= (column2 %) (column1 el)) data2)]
+              (cons (reduce #(merge %2 %1) el matched) acc )))
+          [] data1))
 
 ;; (perform-joins student-subject [[:student_id student :id] [:subject_id subject :id]])
 ;; => [{:subject "Math", :subject_id 1, :surname "Ivanov", :year 1998, :student_id 1, :id 1} {:subject "Math", :subject_id 1, :surname "Petrov", :year 1997, :student_id 2, :id 2} {:subject "CS", :subject_id 2, :surname "Petrov", :year 1997, :student_id 2, :id 2} {:subject "CS", :subject_id 2, :surname "Sidorov", :year 1996, :student_id 3, :id 3}]
